@@ -10,4 +10,10 @@
      output="screen">
 </node>
 
+<node pkg="parker_controller"
+     type="CNN_Test.py"
+     name="CNN_Test" 
+     output="screen">
+</node>
+
 </launch>
