@@ -19,11 +19,14 @@ class CNN_Test:
 
   def __init__(self):
 
-    self.car_maual_driver_sub = rospy.Subscriber("/R1/cmd_vel", Twist, self.CNN_callback)
+    self.car_maual_driver_sub = rospy.Subscriber("/gazebo/model_states", ModelStates, self.CNN_callback)
 
-  def CNN_callback(self, data):
-    #print(data)
-    print(self.car_maual_driver_sub.linear.x)
+    time.sleep(1)
+
+  def CNN_callback(self, msg):
+    print(msg)
+
+rospy.init_node("CNN_Test", anonymous=True)
 
 def main(args):
     ic = CNN_Test()
