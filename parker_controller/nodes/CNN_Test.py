@@ -24,12 +24,14 @@ class CNN_Test:
     time.sleep(1)
 
   def CNN_callback(self, msg):
+
     print(msg)
 
 rospy.init_node("CNN_Test", anonymous=True)
 
 def main(args):
     ic = CNN_Test()
+    time.sleep(1)
 
 if __name__ == '__main__':
     main(sys.argv)
