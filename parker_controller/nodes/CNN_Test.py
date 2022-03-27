@@ -18,11 +18,11 @@ class CNN_Test:
 
     self.car_maual_driver_sub = rospy.Subscriber("/R1/cmd_vel", Twist, self.CNN_callback)
 
-  def CNN_callback(self, data:
+  def CNN_callback(self, data):
     print(data)
 
 def main(args):
-    ic = CNN_callback()
+    ic = CNN_Test()
 
 if __name__ == '__main__':
     main(sys.argv)
