@@ -12,6 +12,9 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import Twist
 
+from gazebo_msgs.msg import ModelStates
+
+
 class CNN_Test:
 
   def __init__(self):
@@ -19,7 +22,8 @@ class CNN_Test:
     self.car_maual_driver_sub = rospy.Subscriber("/R1/cmd_vel", Twist, self.CNN_callback)
 
   def CNN_callback(self, data):
-    print(data)
+    #print(data)
+    print(self.car_maual_driver_sub.linear.x)
 
 def main(args):
     ic = CNN_Test()
