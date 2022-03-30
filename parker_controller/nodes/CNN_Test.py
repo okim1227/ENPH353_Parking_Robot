@@ -21,8 +21,9 @@ class CNN_Test:
 
   def __init__(self):
 
-    self.car_maual_driver_sub = rospy.Subscriber("/gazebo/model_states", ModelStates, self.CNN_callback)
-    self.camera_sub = rospy.Subscriber("/R1/pi_camera/image_raw",Image,self.camera_callback)
+    #self.car_maual_driver_sub = rospy.Subscriber("/gazebo/model_states", ModelStates, self.CNN_callback)
+    self.car_maual_driver_sub = rospy.Subscriber("/R1/cmd_vel", Twist, self.CNN_callback)
+    self.camera_sub = rospy.Subscriber("/R1/pi_camera/image_raw",Image,self.camera_callback, queue_size=1)
 
     time.sleep(1)
 
@@ -32,16 +33,16 @@ class CNN_Test:
 
   def camera_callback(self, msg):
     print("Received an image!")
-    try:
-        # Convert your ROS Image message to OpenCV2
-        cv2_img = bridge.imgmsg_to_cv2(msg, "bgr8")
-    except CvBridgeError, e:
-        print(e)
-    else:
-        # Save your OpenCV2 image as a jpeg 
-        cv2.imwrite('camera_image.jpeg', cv2_img)
+    # try:
+    #     # Convert your ROS Image message to OpenCV2
+    #     cv2_img = bridge.imgmsg_to_cv2(msg, "bgr8")
+    # except CvBridgeError, e:
+    #     print(e)
+    # else:
+    #     # Save your OpenCV2 image as a jpeg 
+    #     cv2.imwrite('camera_image.jpeg', cv2_img)
 
-    self.image = self.bridge.imgmsg_to_cv2(msg)
+    # self.image = self.bridge.imgmsg_to_cv2(msg)
 
   def start(self):
     rospy.loginfo("Timing images")
@@ -57,6 +58,8 @@ rospy.init_node("CNN_Test", anonymous=True)
 def main(args):
     ic = CNN_Test()
     time.sleep(1)
+
+    rospy.spin()
 
 if __name__ == '__main__':
     main(sys.argv)
