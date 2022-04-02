@@ -13,4 +13,10 @@
      output="screen">
 </node>
 
+<node pkg="parker_controller"
+     type="Plate_Imaging.py"
+     name="Plate_Imaging" 
+     output="screen">
+</node>
+
 </launch>
