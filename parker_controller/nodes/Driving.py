@@ -19,10 +19,6 @@ class driver:
     #self.bridge = CvBridge()
 
     #self.pedestrian_sub = rospy.Subscriber("/R1/camera1/image_raw",Image,self.callback)
-    #self.truck_sub = rospy.Subscriber("/R1/camera1/image_raw",Image,self.callback)
-    
-    #self.camera_sub = rospy.Subscriber("/R1/pi_camera/image_raw",Image,self.camera_callback)
-    
     self.cmdVel_pub = rospy.Publisher("/R1/cmd_vel",Twist)
     move = Twist() 
     self.license_pub = rospy.Publisher("/license_plate", String, queue_size=1)

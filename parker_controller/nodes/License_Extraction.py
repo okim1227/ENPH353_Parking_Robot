@@ -21,11 +21,20 @@ class license_extraction:
 
 	def camera_callback(self,data):
 		cv_img = self.bridge.imgmsg_to_cv2(data, "bgr8")
-		gray = cv2.cvtColor(cv_img, cv2.COLOR_RGB2GRAY)
-		_, binary = cv2.threshold(gray, 80, 255, cv2.THRESH_BINARY_INV)
-		crop_img = binary[450:600, 0:350]
-		plt.imshow(crop_img, cmap='gray', vmin=0, vmax=255)
-		plt.show()
+		gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
+		_, binary = cv2.threshold(gray, 70, 200, cv2.THRESH_BINARY_INV)
+		crop_img = binary[450:550, 80:320]
+		leftrow = crop_img[:, 5]
+		for i in range (0, 100):
+			if (leftrow[i] > 10):
+				left = True
+			else:
+				left = False
+				break
+
+		if(left):
+			plt.imshow(crop_img, cmap='gray', vmin=0, vmax=255)
+			plt.show()
 
 def main(args):
 	rospy.init_node("license_extraction", anonymous=True)
