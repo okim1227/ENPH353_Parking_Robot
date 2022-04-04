@@ -6,6 +6,7 @@ import sys
 import rospy
 import cv2
 import time
+import numpy as np
 import matplotlib.pyplot as plt 
 
 from sensor_msgs.msg import Image
@@ -21,20 +22,20 @@ class license_extraction:
 
 	def camera_callback(self,data):
 		cv_img = self.bridge.imgmsg_to_cv2(data, "bgr8")
+		cv2.waitKey(0)
 		gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
 		_, binary = cv2.threshold(gray, 70, 200, cv2.THRESH_BINARY_INV)
-		crop_img = binary[450:550, 80:320]
-		leftrow = crop_img[:, 5]
-		for i in range (0, 100):
-			if (leftrow[i] > 10):
-				left = True
-			else:
-				left = False
-				break
-
-		if(left):
-			plt.imshow(crop_img, cmap='gray', vmin=0, vmax=255)
-			plt.show()
+		image_copy = cv_img[400:550, 0:250]
+		crop_img = binary[400:550, 0:250]
+		#ret, thresh = cv2.threshold(crop_img, 70, 255, cv2.THRESH_BINARY)
+		image, contours, _ = cv2.findContours(crop_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+		cv2.drawContours(image=image_copy, contours=contours, contourIdx=-1, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
+		print(contours)
+		#cv2.cvtColor(image_copy, cv2.COLOR_BGR2RGB)
+		cv2.imshow('None approximation', image_copy)
+		cv2.waitKey(0)
+		cv2.imwrite('contours_none_image1.jpg', image_copy)
+		cv2.destroyAllWindows()
 
 def main(args):
 	rospy.init_node("license_extraction", anonymous=True)
