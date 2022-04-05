@@ -32,19 +32,33 @@ class driver:
 
     move.linear.x = 0.40
     self.cmdVel_pub.publish(move)
-    time.sleep(0.52)
-    move.linear.x = 0.0
-    self.cmdVel_pub.publish(move)
+    time.sleep(0.24)
 
-    move.linear.x = 0.6
-    move.angular.z = 4.7
+    # move.linear.x = 0.0
+    # self.cmdVel_pub.publish(move)
+
+    move.linear.x = 0.52
+    move.angular.z = 3.7
     self.cmdVel_pub.publish(move)
-    time.sleep(0.4)
+    time.sleep(0.24)
+
     move.linear.x = 0.4
     move.angular.z = 0.0
     self.cmdVel_pub.publish(move)
-    time.sleep(1)
-    move.linear.x = 0.0
+    time.sleep(0.4)
+
+    # move.linear.x = 0.52
+    # move.angular.z = 3.8
+    # self.cmdVel_pub.publish(move)
+    # time.sleep(0.24)
+
+    # move.linear.x = 0.4
+    # move.angular.z = 0
+    # self.cmdVel_pub.publish(move)
+    # time.sleep(0.5)
+
+    move.linear.x = 0.
+    move.angular.z = 0
     self.cmdVel_pub.publish(move)
     self.license_pub.publish("NO_NAME,multi12,-1,XR58")
 
