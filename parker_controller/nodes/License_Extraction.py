@@ -43,24 +43,25 @@ class license_extraction:
 			end_points_b = cv2.approxPolyDP(cntsSorted[last_index - 1], 0.01 * cv2.arcLength(cntsSorted[last_index - 1], True), True)
 			if (len(end_points_a) == 4 and len(end_points_b) == 4 and cv2.contourArea(cntsSorted[last_index]) == cv2.contourArea(cntsSorted[last_index]-1)):
 				print("here")
-				x = []
-				y = []
-				x.append(end_points_a[0][0][0])
-				x.append(end_points_a[3][0][0])
-				x.append(end_points_b[0][0][0])
-				x.append(end_points_b[3][0][0])
-				x.sort()
-				x_left = x[1]
-				x_right = x[2]
-				y.append(end_points_a[0][0][1])
-				y.append(end_points_a[1][0][1])
-				y.sort()
-				y_bottom = y[1]
-				#filename = 'save.jpg'
-				plate = image_copy[y_bottom-50:y_bottom + 10, x_left:x_right]
-				self.plate_pub.publish(self.bridge.cv2_to_imgmsg(plate, "bgr8"))
-				print("published")
-				#cv2.imwrite(filename, plate)
+				if (abs(end_points_a[0][0][1] - end_points_a[1][0][1]) > abs(end_points_a[0][0][0] - end_points_a[3][0][0]) and abs(end_points_b[0][0][1] - end_points_b[1][0][1]) > abs(end_points_b[0][0][0] - end_points_b[3][0][0])):
+					x = []
+					y = []
+					x.append(end_points_a[0][0][0])
+					x.append(end_points_a[3][0][0])
+					x.append(end_points_b[0][0][0])
+					x.append(end_points_b[3][0][0])
+					x.sort()
+					x_left = x[1]
+					x_right = x[2]
+					y.append(end_points_a[0][0][1])
+					y.append(end_points_a[1][0][1])
+					y.sort()
+					y_bottom = y[1]
+					#filename = 'save.jpg'
+					plate = image_copy[y_bottom-40:y_bottom + 10, x_left:x_right]
+					self.plate_pub.publish(self.bridge.cv2_to_imgmsg(plate, "bgr8"))
+					print("published")
+					#cv2.imwrite(filename, plate)
 		cv2.waitKey(1)
 		cv2.destroyAllWindows()
 
