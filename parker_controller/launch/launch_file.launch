@@ -14,8 +14,14 @@
 </node>
 
 <node pkg="parker_controller"
-     type="Plate_Imaging.py"
-     name="Plate_Imaging" 
+     type="License_Extraction.py"
+     name="License_Extraction" 
+     output="screen">
+</node>
+
+<node pkg="parker_controller"
+     type="License_CNN.py"
+     name="License_CNN.py" 
      output="screen">
 </node>
 
