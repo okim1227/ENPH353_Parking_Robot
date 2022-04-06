@@ -20,6 +20,7 @@ from cv_bridge import CvBridge, CvBridgeError
 class license_extraction:
 
 	def __init__(self):
+		self.plate_pub = rospy.Publisher("license_cnn", Image)
 		self.bridge = CvBridge()
 		self.camera_sub = rospy.Subscriber("/R1/pi_camera/image_raw",Image,self.camera_callback)
 		time.sleep(1)
@@ -57,6 +58,8 @@ class license_extraction:
 				y_bottom = y[1]
 				#filename = 'save.jpg'
 				plate = image_copy[y_bottom-50:y_bottom, x_left:x_right]
+				self.plate_pub.publish(self.bridge.cv2_to_imgmsg(plate, "bgr8"))
+				print("published")
 				#cv2.imwrite(filename, plate)
 		cv2.waitKey(1)
 		cv2.destroyAllWindows()
