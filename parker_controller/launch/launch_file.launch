@@ -8,8 +8,8 @@
 </node>
 
 <node pkg="parker_controller"
-     type="CNN_Test.py"
-     name="CNN_Test" 
+     type="Driving_CNN_Test.py"
+     name="Driving_CNN_Test" 
      output="screen">
 </node>
 
