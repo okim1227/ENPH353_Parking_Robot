@@ -27,13 +27,16 @@ from tensorflow.python.keras import backend
 
 from gazebo_msgs.msg import ModelStates
 
+import os
+directory = r'/home/fizzer/ros_ws/src/parker_controller/nodes'
+os.chdir(directory)
+
 # Instantiate CvBridge
 br = CvBridge()
 
 class Driving_CNN_Test:
 
   def __init__(self):
-
     # self.car_maual_driver_sub = rospy.Subscriber("/gazebo/model_states", ModelStates, self.CNN_callback)
     self.car_maual_driver_sub = rospy.Subscriber("/R1/cmd_vel", Twist, self.car_manual_driver_callback)
     self.camera_sub = rospy.Subscriber("/R1/pi_camera/image_raw",Image,self.camera_callback, queue_size=10)
@@ -58,13 +61,6 @@ class Driving_CNN_Test:
     index = array.index(twist_command)
     Y= np.eye(2)[index]
     return Y
-  
-  def displayImage(index):
-    plt.imshow(X_dataset[index])
-    caption = ("y = " + str(Y_dataset[index]))#str(np.squeeze(Y_dataset_orig[:, index])))
-    plt.text(0.5, 0.5, caption, 
-             color='orange', fontsize = 20,
-             horizontalalignment='left', verticalalignment='top')
 
   def reset_weights(model):
       session = backend.get_session()
