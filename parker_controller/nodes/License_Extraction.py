@@ -8,6 +8,10 @@ import cv2
 import time
 import numpy as np
 import matplotlib.pyplot as plt 
+# import os
+
+# directory = r'/home/fizzer/Desktop/License_Images'
+# os.chdir(directory)
 
 from sensor_msgs.msg import Image
 
@@ -27,14 +31,34 @@ class license_extraction:
 		_, binary = cv2.threshold(gray, 70, 200, cv2.THRESH_BINARY_INV)
 		image_copy = cv_img[400:550, 0:250]
 		crop_img = binary[400:550, 0:250]
-		#ret, thresh = cv2.threshold(crop_img, 70, 255, cv2.THRESH_BINARY)
 		image, contours, _ = cv2.findContours(crop_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-		cv2.drawContours(image=image_copy, contours=contours, contourIdx=-1, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
-		print(contours)
-		#cv2.cvtColor(image_copy, cv2.COLOR_BGR2RGB)
-		cv2.imshow('None approximation', image_copy)
-		cv2.waitKey(0)
-		cv2.imwrite('contours_none_image1.jpg', image_copy)
+		cntsSorted = sorted(contours, key=lambda x: cv2.contourArea(x))
+		last_index = len(cntsSorted) - 1
+		a = cv2.drawContours(image=image_copy, contours=cntsSorted, contourIdx=last_index, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
+		b = cv2.drawContours(image=image_copy, contours=cntsSorted, contourIdx=last_index-1, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
+
+		if (last_index > 0 and cv2.contourArea(cntsSorted[last_index]) > 2500 and cv2.contourArea(cntsSorted[last_index -1 ]) > 2500):
+			end_points_a = cv2.approxPolyDP(cntsSorted[last_index], 0.01 * cv2.arcLength(cntsSorted[last_index], True), True)
+			end_points_b = cv2.approxPolyDP(cntsSorted[last_index - 1], 0.01 * cv2.arcLength(cntsSorted[last_index - 1], True), True)
+			if (len(end_points_a) == 4 and len(end_points_b) == 4 and cv2.contourArea(cntsSorted[last_index]) == cv2.contourArea(cntsSorted[last_index]-1)):
+				print("here")
+				x = []
+				y = []
+				x.append(end_points_a[0][0][0])
+				x.append(end_points_a[3][0][0])
+				x.append(end_points_b[0][0][0])
+				x.append(end_points_b[3][0][0])
+				x.sort()
+				x_left = x[1]
+				x_right = x[2]
+				y.append(end_points_a[0][0][1])
+				y.append(end_points_a[1][0][1])
+				y.sort()
+				y_bottom = y[1]
+				#filename = 'save.jpg'
+				plate = image_copy[y_bottom-50:y_bottom, x_left:x_right]
+				#cv2.imwrite(filename, plate)
+		cv2.waitKey(1)
 		cv2.destroyAllWindows()
 
 def main(args):
