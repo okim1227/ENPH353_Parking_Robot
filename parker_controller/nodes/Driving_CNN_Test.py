@@ -49,7 +49,7 @@ class Driving_CNN_Test:
     self.speed = msg
 
   def camera_callback(self, msg):
-    print("Received an image!")
+    #print("Received an image!")
     #publish to the camera node to take a picture and save everytime we get a message
     self.camera_data.append(msg)
     self.twist_data.append(self.speed)
@@ -68,7 +68,7 @@ class Driving_CNN_Test:
           if hasattr(layer, 'kernel_initializer'):
               layer.kernel.initializer.run(session=session)
 
-  def predict(image):
+  def driving_CNN_model(image):
     datas = self.twist_data
     imgset = self.camera_data
 
@@ -121,6 +121,8 @@ class Driving_CNN_Test:
                                   validation_split=VALIDATION_SPLIT, 
                                   epochs=80, 
                                   batch_size=16)
+
+    print("dog")
 
     conv_model.save("driving_CNN_model.h5")
 
