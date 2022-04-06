@@ -57,7 +57,7 @@ class license_extraction:
 				y.sort()
 				y_bottom = y[1]
 				#filename = 'save.jpg'
-				plate = image_copy[y_bottom-50:y_bottom, x_left:x_right]
+				plate = image_copy[y_bottom-50:y_bottom + 10, x_left:x_right]
 				self.plate_pub.publish(self.bridge.cv2_to_imgmsg(plate, "bgr8"))
 				print("published")
 				#cv2.imwrite(filename, plate)
