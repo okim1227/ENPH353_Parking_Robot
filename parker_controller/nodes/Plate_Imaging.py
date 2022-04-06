@@ -10,6 +10,10 @@ from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
+# Instantiate CvBridge
+br = CvBridge()
+cv_image = bridge.imgmsg_to_cv2(image_message, desired_encoding='passthrough')
+
 class Plate_Imaging:
 
 	def __init__(self):

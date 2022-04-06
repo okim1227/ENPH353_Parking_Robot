@@ -114,8 +114,19 @@ class Driving_CNN_Test:
 
     conv_model.summary()
 
+    LEARNING_RATE = 1e-4
+    conv_model.compile(loss='categorical_crossentropy',
+                       optimizer=optimizers.RMSprop(lr=LEARNING_RATE),
+                       metrics=['acc'])
 
+    reset_weights(conv_model)
 
+    history_conv = conv_model.fit(X_dataset, Y_dataset, 
+                                  validation_split=VALIDATION_SPLIT, 
+                                  epochs=80, 
+                                  batch_size=16)
+
+    conv_model.save("driving_CNN_model.h5")
 
 
 rospy.init_node("Driving_CNN_Test", anonymous=True)
