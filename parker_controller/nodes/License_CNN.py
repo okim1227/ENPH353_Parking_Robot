@@ -38,7 +38,7 @@ class license_cnn:
 
 	# def predict(image):
 	# 	global sess1
-	# 	global graph1
+	# 	global graph1cv_img = self.bridge.imgmsg_to_cv2(data, "bgr8")
 	# 	with graph1.as_default():
 	# 		set_session(sess1)
 	# 		NN_prediction = plate_NN.predict(image)[0]
