@@ -19,94 +19,81 @@ from tensorflow.python.keras.models import load_model
 
 import numpy as np
 
-sess1 = tf.Session()    
-graph1 = tf.get_default_graph()
-set_session(sess1)
-plate_NN = models.load_model("/home/fizzer/ros_ws/src/parker_controller/nodes/licence_CNN_model.h5")
+import os
+
+directory = r'/home/fizzer/Desktop/License_Images'
+os.chdir(directory)
+
+	
+# sess1 = tf.Session()    
+# graph1 = tf.get_default_graph()
+# set_session(sess1)
+# plate_NN = models.load_model("/home/fizzer/ros_ws/src/parker_controller/nodes/licence_CNN_model.h5")
 
 class license_cnn:
 
 	def __init__(self):
+		self.nm = 261
 		self.bridge = CvBridge()
 		self.plate_sub = rospy.Subscriber("/license_cnn", Image,self.plate_callback)
 		self.array = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 		time.sleep(1)
 
 	def plate_callback(self, data):
-		#process the images then send it to perdict
-		img1 = self.bridge.imgmsg_to_cv2(data, "bgr8")
-		cv_img = cv2.resize(img1, (175, 41), interpolation = cv2.INTER_AREA)
+		cv_img = self.bridge.imgmsg_to_cv2(data, "bgr8")
 		# cv2.imshow("pic", cv_img)
 		# cv2.waitKey(0)
 		gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
-		_, binary = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY_INV)
+		_, binary = cv2.threshold(gray, 75, 255, cv2.THRESH_BINARY_INV)
 		image, contours, _ = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-		cv2.waitKey(0)
+		# cv2.imshow("pic",binary)
+		# cv2.waitKey(0)
 		cntsSorted = sorted(contours, key=lambda x: cv2.contourArea(x))
 		last_index = len(cntsSorted) - 1
-		if(cv2.contourArea(cntsSorted[last_index]) > 50):
-			x_points = []
-			img = []
-			for cnt in contours:
-				x,y,w,h = cv2.boundingRect(cnt)
-				x_points.append(x)
-			x_points.sort()
-			img.append(binary[:,x_points[0]:x_points[0] + 25])
-			img.append(binary[:,x_points[0] + 28: x_points[0] + 53])
-			img.append(binary[:,x_points[0] + 86: x_points[0] + 111])
-			img.append(binary[:,x_points[0] + 113: x_points[0] + 138])
+		if(last_index >= 3 and cv2.contourArea(cntsSorted[last_index]) > 28):
+			print("Recieved")
+			position = []
 			for i in range(0,4):
-				image_temp = img[i]
-				h,w=image_temp.shape[0:2]
-				M = cv2.moments(image_temp)
-				M["m00"] != 0
-				cX = int(M["m10"] / M["m00"]) 
-				cY = int(M["m01"] / M["m00"])
-				Ydiff = (cY - 20) / 2
-				Xdiff = (cX - 12) / 2
-				if (Ydiff < 0):
-					bottom = 0
-					top = abs(Ydiff)
-					image_temp = image_temp[0:h+Ydiff,:]
-				elif(Ydiff > 0):
-					bottom = Ydiff
-					top = 0
-					image_temp = image_temp[Ydiff:h,:]
-
-				if (Xdiff < 0):
-					right = 0
-					left = abs(Xdiff)
-					image_temp = image_temp[:,0:w+Xdiff]
-				elif(Xdiff > 0):
-					right = Xdiff
-					left = 0
-					image_temp = image_temp[:,Xdiff:w]
-
-				image_temp = cv2.copyMakeBorder(image_temp, top, bottom, 0, 0, cv2.BORDER_CONSTANT, (0, 0, 0))
-				image_temp = cv2.resize(image_temp, (25, 41), interpolation = cv2.INTER_AREA)
-
-				image_final = cv2.merge((image_temp,image_temp,image_temp))
-				index = np.argmax(self.predict(np.array([image_final])))
-				plt.imshow(image_final, cmap='gray')
-				plt.show()
-				print(self.array[index])
-				print("next")
-			plt.imshow(img1, cmap='gray')
-			plt.show()
-			# plt.imshow(img[2], cmap='gray')
-			# plt.show()
-			# plt.imshow(img[3], cmap='gray')
+				x,y,w,h = cv2.boundingRect(cntsSorted[last_index - i])
+				position.append([x,y])
+			positionSorted = sorted(position, key=lambda x: x[0])
+			img1 = binary[int(position[0][1]):int(position[0][1])+25,position[0][0]:position[0][0]+25]
+			img2 = binary[int(position[1][1]):int(position[1][1])+25,position[1][0]:position[1][0]+25]
+			img3 = binary[int(position[2][1]):int(position[2][1])+25,position[2][0]:position[2][0]+25]
+			img4 = binary[int(position[3][1]):int(position[3][1])+25,position[3][0]:position[3][0]+25]
+			cv2.imwrite(str(self.nm) + ".png", img1)
+			cv2.imwrite(str(self.nm + 1) + ".png", img2)
+			cv2.imwrite(str(self.nm + 2) + ".png", img3)
+			cv2.imwrite(str(self.nm + 3) + ".png", img4)
+			self.nm =+ 1
+			# image_final_1 = cv2.merge((img1,img1,img1))
+			# image_final_2 = cv2.merge((img2,img2,img2))
+			# image_final_3 = cv2.merge((img3,img3,img3))
+			# image_final_4 = cv2.merge((img4,img4,img4))
+			# index_1 = np.argmax(self.predict(np.array([image_final_1])))
+			# index_2 = np.argmax(self.predict(np.array([image_final_2])))
+			# index_3 = np.argmax(self.predict(np.array([image_final_3])))
+			# index_4 = np.argmax(self.predict(np.array([image_final_4])))
+			# print(self.array[index_1])
+			# print("next")
+			# print(self.array[index_2])
+			# print("next")
+			# print(self.array[index_3])
+			# print("next")
+			# print(self.array[index_4])
+			# print("end")
+			# plt.imshow(img1, cmap='gray')
 			# plt.show()
 		cv2.destroyAllWindows()
 
 
-	def predict(self, image):
-		global sess1
-		global graph1
-		with graph1.as_default():
-			set_session(sess1)
-			NN_prediction = plate_NN.predict(image)[0]
-		return NN_prediction
+	# def predict(self, image):
+	# 	global sess1
+	# 	global graph1
+	# 	with graph1.as_default():
+	# 		set_session(sess1)
+	# 		NN_prediction = plate_NN.predict(image)[0]
+	# 	return NN_prediction
 
 	#blank_image = np.array([np.zeros((125, 105, 3))])
 
