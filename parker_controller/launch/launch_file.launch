@@ -21,7 +21,7 @@
 
 <node pkg="parker_controller"
      type="License_CNN.py"
-     name="License_CNN.py" 
+     name="License_CNN" 
      output="screen">
 </node>
 
