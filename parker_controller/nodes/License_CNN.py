@@ -19,22 +19,23 @@ from tensorflow.python.keras.models import load_model
 
 import numpy as np
 
-# sess1 = tf.Session()    
-# graph1 = tf.get_default_graph()
-# set_session(sess1)
-# plate_NN = models.load_model("/home/fizzer/ros_ws/src/parker_controller/nodes/my_model.h5")
+sess1 = tf.Session()    
+graph1 = tf.get_default_graph()
+set_session(sess1)
+plate_NN = models.load_model("/home/fizzer/ros_ws/src/parker_controller/nodes/licence_CNN_model.h5")
 
 class license_cnn:
 
 	def __init__(self):
 		self.bridge = CvBridge()
 		self.plate_sub = rospy.Subscriber("/license_cnn", Image,self.plate_callback)
+		self.array = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 		time.sleep(1)
 
 	def plate_callback(self, data):
 		#process the images then send it to perdict
-		img = self.bridge.imgmsg_to_cv2(data, "bgr8")
-		cv_img = cv2.resize(img, (175, 41), interpolation = cv2.INTER_AREA)
+		img1 = self.bridge.imgmsg_to_cv2(data, "bgr8")
+		cv_img = cv2.resize(img1, (175, 41), interpolation = cv2.INTER_AREA)
 		# cv2.imshow("pic", cv_img)
 		# cv2.waitKey(0)
 		gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
@@ -52,15 +53,12 @@ class license_cnn:
 			x_points.sort()
 			img.append(binary[:,x_points[0]:x_points[0] + 25])
 			img.append(binary[:,x_points[0] + 28: x_points[0] + 53])
-			img.append( binary[:,x_points[0] + 86: x_points[0] + 111])
+			img.append(binary[:,x_points[0] + 86: x_points[0] + 111])
 			img.append(binary[:,x_points[0] + 113: x_points[0] + 138])
-
 			for i in range(0,4):
-				image = img[i]
-				h,w=image.shape[0:2]
-				print(h)
-				print(w)
-				M = cv2.moments(image)
+				image_temp = img[i]
+				h,w=image_temp.shape[0:2]
+				M = cv2.moments(image_temp)
 				M["m00"] != 0
 				cX = int(M["m10"] / M["m00"]) 
 				cY = int(M["m01"] / M["m00"])
@@ -69,40 +67,40 @@ class license_cnn:
 				if (Ydiff < 0):
 					bottom = 0
 					top = abs(Ydiff)
-					image = image[0:h+Ydiff,:]
+					image_temp = image_temp[0:h+Ydiff,:]
 				elif(Ydiff > 0):
 					bottom = Ydiff
 					top = 0
-					image = image[Ydiff:h,:]
+					image_temp = image_temp[Ydiff:h,:]
 
 				if (Xdiff < 0):
 					right = 0
 					left = abs(Xdiff)
-					image = image[:,0:w+Xdiff]
+					image_temp = image_temp[:,0:w+Xdiff]
 				elif(Xdiff > 0):
 					right = Xdiff
 					left = 0
-					image = image[:,Xdiff:w]
+					image_temp = image_temp[:,Xdiff:w]
 
-				image = cv2.copyMakeBorder(image, top, bottom, 0, 0, cv2.BORDER_CONSTANT, (0, 0, 0))
-				img[i] = cv2.resize(image, (25, 41), interpolation = cv2.INTER_AREA)
-				print(img[i].shape)
+				image_temp = cv2.copyMakeBorder(image_temp, top, bottom, 0, 0, cv2.BORDER_CONSTANT, (0, 0, 0))
+				image_temp = cv2.resize(image_temp, (25, 41), interpolation = cv2.INTER_AREA)
 
-
-			plt.imshow(img[0], cmap='gray')
+				image_final = cv2.merge((image_temp,image_temp,image_temp))
+				index = np.argmax(self.predict(np.array([image_final])))
+				plt.imshow(image_final, cmap='gray')
+				plt.show()
+				print(self.array[index])
+				print("next")
+			plt.imshow(img1, cmap='gray')
 			plt.show()
-			plt.imshow(img[1], cmap='gray')
-			plt.show()
-			plt.imshow(img[2], cmap='gray')
-			plt.show()
-			plt.imshow(img[3], cmap='gray')
-			plt.show()
+			# plt.imshow(img[2], cmap='gray')
+			# plt.show()
+			# plt.imshow(img[3], cmap='gray')
+			# plt.show()
 		cv2.destroyAllWindows()
 
 
-
-
-	def predict(image):
+	def predict(self, image):
 		global sess1
 		global graph1
 		with graph1.as_default():
