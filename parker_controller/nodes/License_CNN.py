@@ -25,15 +25,14 @@ directory = r'/home/fizzer/Desktop/License_Images'
 os.chdir(directory)
 
 	
-# sess1 = tf.Session()    
-# graph1 = tf.get_default_graph()
-# set_session(sess1)
-# plate_NN = models.load_model("/home/fizzer/ros_ws/src/parker_controller/nodes/licence_CNN_model.h5")
+sess1 = tf.Session()    
+graph1 = tf.get_default_graph()
+set_session(sess1)
+plate_NN = models.load_model("/home/fizzer/ros_ws/src/parker_controller/nodes/licence_CNN_model.h5")
 
 class license_cnn:
 
 	def __init__(self):
-		self.nm = 261
 		self.bridge = CvBridge()
 		self.plate_sub = rospy.Subscriber("/license_cnn", Image,self.plate_callback)
 		self.array = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -57,43 +56,36 @@ class license_cnn:
 				x,y,w,h = cv2.boundingRect(cntsSorted[last_index - i])
 				position.append([x,y])
 			positionSorted = sorted(position, key=lambda x: x[0])
-			img1 = binary[int(position[0][1]):int(position[0][1])+25,position[0][0]:position[0][0]+25]
-			img2 = binary[int(position[1][1]):int(position[1][1])+25,position[1][0]:position[1][0]+25]
-			img3 = binary[int(position[2][1]):int(position[2][1])+25,position[2][0]:position[2][0]+25]
-			img4 = binary[int(position[3][1]):int(position[3][1])+25,position[3][0]:position[3][0]+25]
-			cv2.imwrite(str(self.nm) + ".png", img1)
-			cv2.imwrite(str(self.nm + 1) + ".png", img2)
-			cv2.imwrite(str(self.nm + 2) + ".png", img3)
-			cv2.imwrite(str(self.nm + 3) + ".png", img4)
-			self.nm =+ 1
-			# image_final_1 = cv2.merge((img1,img1,img1))
-			# image_final_2 = cv2.merge((img2,img2,img2))
-			# image_final_3 = cv2.merge((img3,img3,img3))
-			# image_final_4 = cv2.merge((img4,img4,img4))
-			# index_1 = np.argmax(self.predict(np.array([image_final_1])))
-			# index_2 = np.argmax(self.predict(np.array([image_final_2])))
-			# index_3 = np.argmax(self.predict(np.array([image_final_3])))
-			# index_4 = np.argmax(self.predict(np.array([image_final_4])))
-			# print(self.array[index_1])
-			# print("next")
-			# print(self.array[index_2])
-			# print("next")
-			# print(self.array[index_3])
-			# print("next")
-			# print(self.array[index_4])
-			# print("end")
-			# plt.imshow(img1, cmap='gray')
-			# plt.show()
+			img1 = binary[int(positionSorted[0][1]):int(positionSorted[0][1])+25,positionSorted[0][0]:positionSorted[0][0]+25]
+			img2 = binary[int(positionSorted[1][1]):int(positionSorted[1][1])+25,positionSorted[1][0]:positionSorted[1][0]+25]
+			img3 = binary[int(positionSorted[2][1]):int(positionSorted[2][1])+25,positionSorted[2][0]:positionSorted[2][0]+25]
+			img4 = binary[int(positionSorted[3][1]):int(positionSorted[3][1])+25,positionSorted[3][0]:positionSorted[3][0]+25]
+			img1 = cv2.resize(img1, (25,25), interpolation = cv2.INTER_AREA)
+			img2 = cv2.resize(img2, (25,25), interpolation = cv2.INTER_AREA)
+			img3 = cv2.resize(img3, (25,25), interpolation = cv2.INTER_AREA)
+			img4 = cv2.resize(img4, (25,25), interpolation = cv2.INTER_AREA)
+			image_final_1 = cv2.merge((img1,img1,img1))
+			image_final_2 = cv2.merge((img2,img2,img2))
+			image_final_3 = cv2.merge((img3,img3,img3))
+			image_final_4 = cv2.merge((img4,img4,img4))
+			index_1 = np.argmax(self.predict(np.array([image_final_1])))
+			index_2 = np.argmax(self.predict(np.array([image_final_2])))
+			index_3 = np.argmax(self.predict(np.array([image_final_3])))
+			index_4 = np.argmax(self.predict(np.array([image_final_4])))
+			print(self.array[index_1] + self.array[index_2] + self.array[index_3] + self.array[index_4] )
+			print("next")
+			plt.imshow(cv_img, cmap='gray')
+			plt.show()
 		cv2.destroyAllWindows()
 
 
-	# def predict(self, image):
-	# 	global sess1
-	# 	global graph1
-	# 	with graph1.as_default():
-	# 		set_session(sess1)
-	# 		NN_prediction = plate_NN.predict(image)[0]
-	# 	return NN_prediction
+	def predict(self, image):
+		global sess1
+		global graph1
+		with graph1.as_default():
+			set_session(sess1)
+			NN_prediction = plate_NN.predict(image)[0]
+		return NN_prediction
 
 	#blank_image = np.array([np.zeros((125, 105, 3))])
 
