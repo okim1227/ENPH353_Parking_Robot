@@ -26,22 +26,29 @@ class Driving_CNN_Test:
   def __init__(self):
     # self.car_maual_driver_sub = rospy.Subscriber("/gazebo/model_states", ModelStates, self.CNN_callback)
     self.car_maual_driver_sub = rospy.Subscriber("/R1/cmd_vel", Twist, self.car_manual_driver_callback)
-    self.camera_sub = rospy.Subscriber("/R1/pi_camera/image_raw",Image,self.camera_callback, queue_size=100)
+    self.camera_sub = rospy.Subscriber("/R1/pi_camera/image_raw",Image,self.camera_callback, queue_size=10)
     self.bridge = CvBridge()
-    self.speed  = []
+    
     self.twist_data = []
+    self.speed = Twist()
+
     self.capture_index = 0
+    self.capture_period = 0.5
+    self.temp_last_time = 0.0
+
+    self.scale_percent = 25 # percent of original size
     time.sleep(1)
 
   def car_manual_driver_callback(self, msg):
-    self.speed_linear = msg
+    self.speed = msg
+    print(self.speed)
 
   def camera_callback(self, msg):
-    #print("Received an image!")
+    # print("Received an image!")
 
     # Append the current twist command when camera callback is called
-    self.twist_data.append(self.speed)
-    print(self.twist_data)
+    # self.twist_data.append(self.speed)
+    # print(self.twist_data)
 
     # output_twist_file = open("Twist_Commands.txt", "w")
     # output_twist_file.write(self.twist_data)
@@ -49,11 +56,33 @@ class Driving_CNN_Test:
 
     # Save the captured image from camera subscriber to the Driving Views folder
     # Name of capture is Capture_{linear_x command}_{angular_z command}
-    cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
-    cv2.imwrite(os.path.join(directory + "/Driving_Data/", "Capture_{}_{}.png".format(self.speed.linear.x, self.speed.angular.z)), cv_image)
-    
+    current_time  = rospy.get_time()
+    print(current_time)
+
+    time_difference = abs(current_time - self.temp_last_time)
+    print(time_difference)
+
+
+    if (time_difference >= self.capture_period):
+      print("CAPTURE!")
+
+      cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+      print("Original Dimensions : ", cv_image.shape)
+      
+      width = int(cv_image.shape[1] * self.scale_percent / 100)
+      height = int(cv_image.shape[0] * self.scale_percent / 100)
+      dim = (width, height)
+      resized = cv2.resize(cv_image, dim, interpolation = cv2.INTER_AREA)
+      print("Resized Dimensions : ",resized.shape)
+
+      #cv2.imwrite(os.path.join(directory + "/Driving_Data/", "Capture_{}_{}_{}.png".format(self.capture_index, self.speed.linear.x, self.speed.angular.z)), cv_image)
+
+      self.temp_last_time = current_time
+      print(self.temp_last_time)
+
     self.capture_index = self.capture_index + 1
-    print(self.capture_index)
+
+    # print(self.capture_index)
 
 rospy.init_node("Driving_CNN_Test", anonymous=True)
 
