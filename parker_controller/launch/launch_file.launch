@@ -26,6 +26,12 @@
 </node>
 
 <node pkg="parker_controller"
+     type="Driving_CNN.py"
+     name="Driving_CNN" 
+     output="screen">
+</node>
+
+<node pkg="parker_controller"
      type="Twist_Commands.txt"
      name="Twist_Commands.txt" 
      output="screen">
