@@ -15,117 +15,41 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import Twist
 
-import ipywidgets as ipywidgets
-from ipywidgets import interact
-
-from tensorflow.keras import layers
-from tensorflow.keras import models
-from tensorflow.keras import optimizers
-
-from tensorflow.keras.utils import plot_model
-from tensorflow.python.keras import backend
-
 from gazebo_msgs.msg import ModelStates
 
 import os
 directory = r'/home/fizzer/ros_ws/src/parker_controller/nodes'
 os.chdir(directory)
 
-# Instantiate CvBridge
-br = CvBridge()
-
 class Driving_CNN_Test:
 
   def __init__(self):
+    self.bridge = CvBridge()
     # self.car_maual_driver_sub = rospy.Subscriber("/gazebo/model_states", ModelStates, self.CNN_callback)
     self.car_maual_driver_sub = rospy.Subscriber("/R1/cmd_vel", Twist, self.car_manual_driver_callback)
-    self.camera_sub = rospy.Subscriber("/R1/pi_camera/image_raw",Image,self.camera_callback, queue_size=10)
+    self.camera_sub = rospy.Subscriber("/R1/pi_camera/image_raw",Image,self.camera_callback, queue_size=100)
     self.speed  = []
     self.twist_data = []
-    self.camera_data = []
+    self.capture_index = 0
     time.sleep(1)
+
 
   def car_manual_driver_callback(self, msg):
     self.speed = msg
 
   def camera_callback(self, msg):
     #print("Received an image!")
-    #publish to the camera node to take a picture and save everytime we get a message
-    self.camera_data.append(msg)
+
+    # Append the current twist command when camera callback is called
     self.twist_data.append(self.speed)
-    # print(self.camera_data)
-    # print(self.twist_data)
+    print(self.twist_data[self.capture_index])
 
-  def convert_to_one_hot(twist_command):
-    array = ['Straight', 'Turn_Left']
-    index = array.index(twist_command)
-    Y= np.eye(2)[index]
-    return Y
+    # Save the captured image from camera subscriber to the Driving Views folder
+    cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+    cv2.imwrite(os.path.join(directory + "/Driving_Views/", "Capture_{}.png".format(self.capture_index)), cv_image)
+    self.capture_index = self.capture_index + 1
 
-  def reset_weights(model):
-      session = backend.get_session()
-      for layer in model.layers: 
-          if hasattr(layer, 'kernel_initializer'):
-              layer.kernel.initializer.run(session=session)
-
-  def driving_CNN_model(image):
-    datas = self.twist_data
-    imgset = self.camera_data
-
-    np.random.shuffle(imgset)
-
-    X_dataset_orig = np.array([data[0] for data in imgset[:]])
-    X_dataset = X_dataset_orig/255
-    Y_dataset_orig = np.array([[data[1]] for data in imgset])
-    Y_dataset = np.array([convert_to_one_hot(letter) for letter in Y_dataset_orig])
-
-    VALIDATION_SPLIT = 0.2
-
-    print("Total examples: {:d}\nTraining examples: {:d}\nTest examples: {:d}".
-          format(X_dataset.shape[0],
-                 math.ceil(X_dataset.shape[0] * (1-VALIDATION_SPLIT)),
-                 math.floor(X_dataset.shape[0] * VALIDATION_SPLIT)))
-    print("X shape: " + str(X_dataset.shape))
-    print("Y shape: " + str(Y_dataset.shape))
-    
-    interact(displayImage, 
-           index=ipywidgets.IntSlider(min=0, max=X_dataset_orig.shape[0],
-                                      step=1, value=10))
-    displayImage(35)
-
-    conv_model = models.Sequential()
-    conv_model.add(layers.Conv2D(32, (3, 3), activation='relu',
-                                 input_shape=(125, 105, 3)))
-    conv_model.add(layers.MaxPooling2D((2, 2)))
-    conv_model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-    conv_model.add(layers.MaxPooling2D((2, 2)))
-    conv_model.add(layers.Conv2D(125, (3, 3), activation='relu'))
-    conv_model.add(layers.MaxPooling2D((2, 2)))
-    conv_model.add(layers.Conv2D(105, (3, 3), activation='relu'))
-    conv_model.add(layers.MaxPooling2D((2, 2)))
-    conv_model.add(layers.Flatten())
-    conv_model.add(layers.Dropout(0.5))
-    conv_model.add(layers.Dense(512, activation='relu'))
-    conv_model.add(layers.Dense(36, activation='softmax'))
-
-    conv_model.summary()
-
-    LEARNING_RATE = 1e-4
-    conv_model.compile(loss='categorical_crossentropy',
-                       optimizer=optimizers.RMSprop(lr=LEARNING_RATE),
-                       metrics=['acc'])
-
-    reset_weights(conv_model)
-
-    history_conv = conv_model.fit(X_dataset, Y_dataset, 
-                                  validation_split=VALIDATION_SPLIT, 
-                                  epochs=80, 
-                                  batch_size=16)
-
-    print("dog")
-
-    conv_model.save("driving_CNN_model.h5")
-
+    print(self.capture_index)
 
 rospy.init_node("Driving_CNN_Test", anonymous=True)
 
