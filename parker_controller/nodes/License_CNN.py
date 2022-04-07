@@ -41,27 +41,62 @@ class license_cnn:
 		_, binary = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY_INV)
 		image, contours, _ = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 		cv2.waitKey(0)
-		x_points = []
-		for cnt in contours:
-			x,y,w,h = cv2.boundingRect(cnt)
-			x_points.append(x)
-		x_points.sort()
-		img1 = binary[:,x_points[0]:x_points[0] + 25]
-		img2 = binary[:,x_points[0] + 27: x_points[0] + 52]
-		img3 = binary[:,x_points[0] + 85: x_points[0] + 110]
-		img4 = binary[:,x_points[0] + 112: x_points[0] + 137]
-		print(img1.shape)
-		print(img2.shape)
-		print(img3.shape)
-		print(img4.shape)
-		plt.imshow(img1, cmap='gray')
-		plt.show()
-		plt.imshow(img2, cmap='gray')
-		plt.show()
-		plt.imshow(img3, cmap='gray')
-		plt.show()
-		plt.imshow(img4, cmap='gray')
-		plt.show()
+		cntsSorted = sorted(contours, key=lambda x: cv2.contourArea(x))
+		last_index = len(cntsSorted) - 1
+		if(cv2.contourArea(cntsSorted[last_index]) > 50):
+			x_points = []
+			img = []
+			for cnt in contours:
+				x,y,w,h = cv2.boundingRect(cnt)
+				x_points.append(x)
+			x_points.sort()
+			img.append(binary[:,x_points[0]:x_points[0] + 25])
+			img.append(binary[:,x_points[0] + 28: x_points[0] + 53])
+			img.append( binary[:,x_points[0] + 86: x_points[0] + 111])
+			img.append(binary[:,x_points[0] + 113: x_points[0] + 138])
+
+			for i in range(0,4):
+				image = img[i]
+				h,w=image.shape[0:2]
+				print(h)
+				print(w)
+				M = cv2.moments(image)
+				M["m00"] != 0
+				cX = int(M["m10"] / M["m00"]) 
+				cY = int(M["m01"] / M["m00"])
+				Ydiff = (cY - 20) / 2
+				Xdiff = (cX - 12) / 2
+				if (Ydiff < 0):
+					bottom = 0
+					top = abs(Ydiff)
+					image = image[0:h+Ydiff,:]
+				elif(Ydiff > 0):
+					bottom = Ydiff
+					top = 0
+					image = image[Ydiff:h,:]
+
+				if (Xdiff < 0):
+					right = 0
+					left = abs(Xdiff)
+					image = image[:,0:w+Xdiff]
+				elif(Xdiff > 0):
+					right = Xdiff
+					left = 0
+					image = image[:,Xdiff:w]
+
+				image = cv2.copyMakeBorder(image, top, bottom, 0, 0, cv2.BORDER_CONSTANT, (0, 0, 0))
+				img[i] = cv2.resize(image, (25, 41), interpolation = cv2.INTER_AREA)
+				print(img[i].shape)
+
+
+			plt.imshow(img[0], cmap='gray')
+			plt.show()
+			plt.imshow(img[1], cmap='gray')
+			plt.show()
+			plt.imshow(img[2], cmap='gray')
+			plt.show()
+			plt.imshow(img[3], cmap='gray')
+			plt.show()
 		cv2.destroyAllWindows()
 
 
