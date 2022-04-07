@@ -17,14 +17,9 @@ class driver:
   def __init__(self):
 
     #self.bridge = CvBridge()
-
-    #self.pedestrian_sub = rospy.Subscriber("/R1/camera1/image_raw",Image,self.callback)
     self.cmdVel_pub = rospy.Publisher("/R1/cmd_vel", Twist)
     move = Twist() 
     self.license_pub = rospy.Publisher("/license_plate", String, queue_size=1)
-
-    #self.clock_sub = rospy.Subscriber("/clock",String,self.clock_callback)
-
     time.sleep(1)
 
     self.license_pub.publish("NO_NAME,multi12,0,XR58")
@@ -60,7 +55,6 @@ class driver:
     move.linear.x = 0.
     move.angular.z = 0
     self.cmdVel_pub.publish(move)
-    self.license_pub.publish("NO_NAME,multi12,-1,XR58")
 
 
   #def clock_callback(self,data):S

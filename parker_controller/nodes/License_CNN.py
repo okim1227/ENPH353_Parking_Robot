@@ -34,6 +34,8 @@ class license_cnn:
 
 	def __init__(self):
 		self.bridge = CvBridge()
+		self.i = 2
+		self.license_pub = rospy.Publisher("/license_plate", String, queue_size=1)
 		self.plate_sub = rospy.Subscriber("/license_cnn", Image,self.plate_callback)
 		self.array = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 		time.sleep(1)
@@ -73,9 +75,9 @@ class license_cnn:
 			index_3 = np.argmax(self.predict(np.array([image_final_3])))
 			index_4 = np.argmax(self.predict(np.array([image_final_4])))
 			print(self.array[index_1] + self.array[index_2] + self.array[index_3] + self.array[index_4] )
-			print("next")
-			plt.imshow(cv_img, cmap='gray')
-			plt.show()
+			TeamRed,multi21,4,XR58
+			self.license_pub.publish("PARKER,multi12," +  str(self.i) + str(self.array[index_1]) + str(self.array[index_2]) + str(self.array[index_3]) + str(self.array[index_4]))
+			self.i = -1
 		cv2.destroyAllWindows()
 
 
