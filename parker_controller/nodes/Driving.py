@@ -32,13 +32,13 @@ class driver:
 
     move.linear.x = 0.40
     self.cmdVel_pub.publish(move)
-    time.sleep(0.24)
+    time.sleep(0.35)
 
     # move.linear.x = 0.0
     # self.cmdVel_pub.publish(move)
 
     move.linear.x = 0.52
-    move.angular.z = 3.7
+    move.angular.z = 3.8
     self.cmdVel_pub.publish(move)
     time.sleep(0.24)
 
@@ -47,10 +47,10 @@ class driver:
     self.cmdVel_pub.publish(move)
     time.sleep(0.4)
 
-    # move.linear.x = 0.52
-    # move.angular.z = 3.8
-    # self.cmdVel_pub.publish(move)
-    # time.sleep(0.24)
+    move.linear.x = 0.0
+    move.angular.z = 3.8
+    self.cmdVel_pub.publish(move)
+    time.sleep(0.24)
 
     # move.linear.x = 0.4
     # move.angular.z = 0
